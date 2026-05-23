@@ -8,17 +8,17 @@ usage() {
   local c_white=$(color "white");
   local c_bold_white=$(color "boldwhite");
 
-  echo "";
-  echo -e "${c_gold}Checking LetsEncrypt SSL Certificates${c_reset}";
-  echo -e "  ${c_dkgray}$0${c_reset}";
-  echo "";
-  echo -e "  ${c_bold_white}--help ${c_blue}|${c_white} -h ${c_reset} Display this";
-  echo -e "  ${c_bold_white}--date ${c_blue}|${c_white} -d ${c_reset} Sort by date (yyyy-mm-dd)";
-  echo -e "  ${c_bold_white}--name ${c_blue}|${c_white} -n ${c_reset} Sort by domain name (host.domain.tld)";
-  echo -e "  ${c_bold_white}--rev  ${c_blue}|${c_white} -r ${c_reset} Sort by reverse name (tld.domain.host)";
-  echo -e "  ${c_bold_white}--asc  ${c_blue}|${c_white} -a ${c_reset} Sort ascending (a-z)";
-  echo -e "  ${c_bold_white}--desc ${c_blue}|${c_white} -e ${c_reset} Sort descending (z-a)";
-  echo -e "${c_reset}";
+printf "%s\n" "
+printf "%b\n" "${c_gold}Checking LetsEncrypt SSL Certificates${c_reset}"
+printf "%b\n" "  ${c_dkgray}$0${c_reset}"
+printf "%s\n" ""
+printf "%b\n" "  ${c_bold_white}--help ${c_blue}|${c_white} -h ${c_reset} Display this"
+printf "%b\n" "  ${c_bold_white}--date ${c_blue}|${c_white} -d ${c_reset} Sort by date (yyyy-mm-dd)"
+printf "%b\n" "  ${c_bold_white}--name ${c_blue}|${c_white} -n ${c_reset} Sort by domain name (host.domain.tld)"
+printf "%b\n" "  ${c_bold_white}--rev  ${c_blue}|${c_white} -r ${c_reset} Sort by reverse name (tld.domain.host)"
+printf "%b\n" "  ${c_bold_white}--asc  ${c_blue}|${c_white} -a ${c_reset} Sort ascending (a-z)"
+printf "%b\n" "  ${c_bold_white}--desc ${c_blue}|${c_white} -e ${c_reset} Sort descending (z-a)"
+printf "%b\n" "${c_reset}"
 }
 
 # -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ function month2num() {
   local leading="";
 
   if ! [[ -z "$1" ]]; then
-    month_input=`echo "$1" | cut -b1-3 | tr "[:upper:]" "[:lower:]"`;
+    month_input=$(printf "%s\n" "$1" | cut -b1-3 | tr "[:upper:]" "[:lower:]")
 
     case $month_input in
       "jan") month="1"; ;;
@@ -70,8 +70,8 @@ function month2num() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$month'";
   else
-      echo "$month";
-  fi
+      printf "%s\n" "$month"
+  fi1
 }
 
 # -----------------------------------------------------------------------------
@@ -96,10 +96,10 @@ function read_x509() {
     cert_fqdn_list=$(openssl x509 -in "$cert_file" -nocert -ext subjectAltName | cut -s -d, -f1- --output-delimiter=" ");
 
     local cert_end_date=`openssl x509 -in "$cert_file" -nocert -enddate | cut -d"=" -f2`;
-    local cert_end_year=`echo "$cert_end_date" | rev | cut -d" " -f2 | rev`;
-    local cert_end_month_string=`echo "$cert_end_date" | cut -d" " -f1`;
+    local cert_end_year=`printf "%s\n" ""$cert_end_date" | rev | cut -d" " -f2 | rev`;"printf
+    local cert_end_month_string=`printf "%s\n" ""$cert_end_date" | cut -d" " -f1`;"
     local cert_end_month_num=$(month2num "$cert_end_month_string" "--prepend_zero");
-    local cert_end_day=`echo "$cert_end_date" | rev | cut -d" " -f4 | rev`;
+    local cert_end_day=`printf "%s\n" ""$cert_end_date" | rev | cut -d" " -f4 | rev`;"
     if [[ $(( cert_end_day < 10 )) = 1 ]]; then
       cert_end_day="0""$cert_end_day";
     fi
@@ -118,7 +118,7 @@ function read_x509() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$cert_data'";
   else
-      echo "$cert_data";
+printf "%s\n" ""$cert_data";"
   fi
 }
 
@@ -148,11 +148,11 @@ function build_cert_line() {
         after_domain_space="$after_domain_space ";
       done
 
-      local cert_end_stripped=`echo "$cert_end" | cut -c5,8 --complement`;
+      local cert_end_stripped=`printf "%s\n" ""$cert_end" | cut -c5,8 --complement`;"
       local cert_end_as_sec=`date +%s -d "$cert_end_stripped"`;
 
       local today=`date +%Y-%m-%d`;
-      local today_stripped=`echo "$today" | cut -c5,8 --complement`;
+      local today_stripped=`printf "%s\n" ""$today" | cut -c5,8 --complement`;"
       local today_as_sec=`date +%s -d "$today_stripped"`;
 
       local difference_as_days=$(( ($cert_end_as_sec - $today_as_sec) / $secinday ));
@@ -240,7 +240,7 @@ function build_cert_line() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$build'";
   else
-      echo "$build";
+printf "%s\n" ""$build";"
   fi
 }
 
@@ -321,7 +321,7 @@ function color() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$answer'";
   else
-      echo "$answer";
+printf "%s\n" ""$answer";"
   fi
   return 0;
 }
@@ -409,7 +409,7 @@ fi
 # Main Script Body - slim version, only check/display status of cert
 # -----------------------------------------------------------------------------
 if ! [[ -d "$certpath" ]]; then
-  echo "Certificate directory not found: $certpath";
+printf "%s\n" ""Certificate directory not found: $certpath";"
 else
   cert_list=$(ls -1R "$certpath/"*"/cert.pem" | sort -f)
   filename_array=();
@@ -421,12 +421,12 @@ else
     for one_cert in $cert_list; do
       filename_array+=("$one_cert");
       cert_info=$(read_x509 "$one_cert");
-      cert_name=`echo "$cert_info" | cut -d, -f1`;
+      cert_name=`printf "%s\n" ""$cert_info" | cut -d, -f1`;"
       cert_name_array+=("$cert_name");
       if (( domain_maxlength < ${#cert_name} )); then
         domain_maxlength="${#cert_name}";
       fi
-      cert_end=`echo "$cert_info" | cut -d, -f2`;
+      cert_end=`printf "%s\n" ""$cert_info" | cut -d, -f2`;"
       cert_end_array+=("$cert_end");
       case "${sort_using}" in
         "name") sort_on_array+=("$cert_name"); ;;
@@ -473,29 +473,29 @@ else
   #  *) false; ;;
   # esac
 
-  if [[ "$debug" == "true" ]]; then echo ""; fi;
-  if [[ "$debug" == "true" ]]; then echo "Database (${#filename_array[@]})  Sort Request: ${sort_using} ${sort_direction}"; fi;
+  if [[ "$debug" == "true" ]]; then printf "%s\n" """; fi;"
+  if [[ "$debug" == "true" ]]; then printf "%s\n" ""Database (${#filename_array[@]})  Sort Request: ${sort_using} ${sort_direction}"; fi;"
   for (( i=0; $i<${#filename_array[@]}; i++ )) do
     count=$(( $i + 1 ));
     if (( ${#count} == 1 )); then
-      if [[ "$debug" == "true" ]]; then echo -n "  $count:"; fi;
+      if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  $count:"; fi;"
     elif (( ${#count} == 2 )); then
-      if [[ "$debug" == "true" ]]; then echo -n " $count:"; fi;
+      if [[ "$debug" == "true" ]]; then printf "%s\n" "-n " $count:"; fi;"
     fi
-    if [[ "$debug" == "true" ]]; then echo -n "  ${cert_end_array[$i]}"; fi;
-    if [[ "$debug" == "true" ]]; then echo -n "  ${cert_name_array[$i]}"; fi;
+    if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  ${cert_end_array[$i]}"; fi;"
+    if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  ${cert_name_array[$i]}"; fi;"
     for (( j=${#cert_name_array[$i]}; $j<$domain_maxlength; j++ )) do
-      if [[ "$debug" == "true" ]]; then echo -n " "; fi;
+      if [[ "$debug" == "true" ]]; then printf "%s\n" "-n " "; fi;"
     done
-    if [[ "$debug" == "true" ]]; then echo -n "  ${sort_on_array[$i]}"; fi;
-    if [[ "$debug" == "true" ]]; then echo ""; fi;
+    if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  ${sort_on_array[$i]}"; fi;"
+    if [[ "$debug" == "true" ]]; then printf "%s\n" """; fi;"
   done
-  if [[ "$debug" == "true" ]]; then echo ""; fi;
+  if [[ "$debug" == "true" ]]; then printf "%s\n" """; fi;"
 
   if (( ${#filename_array[@]} == 0 )); then
-    echo "";
-    echo -e "${c_bold_white}Checking LetsEncrypt SSL Certificates${c_reset}";
-    echo -e "  ${c_red}No Certificate Files Found.${c_reset}";
+printf "%s\n" """;"
+printf "%b\n" ""${c_bold_white}Checking LetsEncrypt SSL Certificates${c_reset}";"
+printf "%b\n" ""  ${c_red}No Certificate Files Found.${c_reset}";"
   else
     # bubble sorting
     array_length=${#filename_array[@]};
@@ -511,16 +511,16 @@ else
           if [[ "$sort_direction" == "desc" ]]; then
             if [[ "${itema}" < "${itemb}" ]]; then
               do_swap="true";
-              if [[ "$debug" == "true" ]]; then echo -n "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;
+              if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;"
             fi
           else
             if [[ "${itema}" > "${itemb}" ]]; then
               do_swap="true";
-              if [[ "$debug" == "true" ]]; then echo -n "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;
+              if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;"
             fi
           fi
           if [[ "${do_swap}" == "true" ]]; then
-            if [[ "$debug" == "true" ]]; then echo " - performing swap"; fi;
+            if [[ "$debug" == "true" ]]; then printf "%s\n" "" - performing swap"; fi;"
             swapped=1;
             temp_filename="${filename_array[$indexa]}";
             filename_array[$indexa]="${filename_array[$indexb]}";
@@ -541,20 +541,20 @@ else
       done
     done
 
-    echo "";
-    echo -en "${c_bold_white}Checking LetsEncrypt SSL Certificate";
+printf "%s\n" """;"
+printf "%b" ""${c_bold_white}Checking LetsEncrypt SSL Certificate";"
     if (( ${#filename_array[@]} > 1 )); then
-      echo -en "s${c_reset} ${c_white}(${c_gold}${#filename_array[@]}${c_white}) ${c_dkgray}(${sort_using} ${sort_direction})${c_reset}";
+printf "%b" ""s${c_reset} ${c_white}(${c_gold}${#filename_array[@]}${c_white}) ${c_dkgray}(${sort_using} ${sort_direction})${c_reset}";"
     fi
-    echo "";
+printf "%s\n" """;"
 
     for (( i=0; $i<${#filename_array[@]}; i++ )); do
       one_line=$(build_cert_line "${cert_end_array[$i]}" "${cert_name_array[$i]}" "$domain_maxlength");
-      echo -e "$one_line";
+printf "%b\n" ""$one_line";"
 
       if ! [[ -z "$1" ]]; then
         if [[ "$1" == "--renew" ]]; then
-          check=`echo "$one_line" | grep -o "$warning"`;
+          check=`printf "%s\n" ""$one_line" | grep -o "$warning"`;"
           if ! [[ -z "$check" ]]; then
             sudo certbot renew --cert-name ${cert_name_array[$i]} --quiet;
           fi
