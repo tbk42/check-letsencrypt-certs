@@ -6,9 +6,9 @@ usage() {
   local c_dkgray=$(color "dkgray");
   local c_gold=$(color "gold");
   local c_white=$(color "white");
-  local c_bold_white=$(color "boldwhite");
+  local c_bold_white="$(color "boldwhite")";
 
-printf "%s\n" "
+printf "%s\n" ""
 printf "%b\n" "${c_gold}Checking LetsEncrypt SSL Certificates${c_reset}"
 printf "%b\n" "  ${c_dkgray}$0${c_reset}"
 printf "%s\n" ""
@@ -71,7 +71,7 @@ function month2num() {
       eval $__resultvar="'$month'";
   else
       printf "%s\n" "$month"
-  fi1
+  fi
 }
 
 # -----------------------------------------------------------------------------
@@ -91,21 +91,21 @@ function read_x509() {
   if ! [[ -z "$1" ]]; then
     cert_file="$1";
 
-    local cert_subject_domain=`openssl x509 -in "$cert_file" -nocert -subject | cut -d= -f3 | cut -b2-`;
+    local cert_subject_domain=$(openssl x509 -in "$cert_file" -nocert -subject | cut -d= -f3 | cut -b2-);
 
     cert_fqdn_list=$(openssl x509 -in "$cert_file" -nocert -ext subjectAltName | cut -s -d, -f1- --output-delimiter=" ");
 
-    local cert_end_date=`openssl x509 -in "$cert_file" -nocert -enddate | cut -d"=" -f2`;
-    local cert_end_year=`printf "%s\n" ""$cert_end_date" | rev | cut -d" " -f2 | rev`;"printf
-    local cert_end_month_string=`printf "%s\n" ""$cert_end_date" | cut -d" " -f1`;"
+    local cert_end_date=$(openssl x509 -in "$cert_file" -nocert -enddate | cut -d"=" -f2);
+    local cert_end_year=$(printf "%s\n" "$cert_end_date" | rev | cut -d" " -f2 | rev);
+    local cert_end_month_string=$(printf "%s\n" "$cert_end_date" | cut -d" " -f1);
     local cert_end_month_num=$(month2num "$cert_end_month_string" "--prepend_zero");
-    local cert_end_day=`printf "%s\n" ""$cert_end_date" | rev | cut -d" " -f4 | rev`;"
+    local cert_end_day=$(printf "%s\n" "$cert_end_date" | rev | cut -d" " -f4 | rev);
     if [[ $(( cert_end_day < 10 )) = 1 ]]; then
       cert_end_day="0""$cert_end_day";
     fi
     local cert_end="${cert_end_year}-${cert_end_month_num}-${cert_end_day}";
 
-    local cert_will_expire=`openssl x509 -in "$cert_file" -nocert -checkend $(( 14 * $secinday )) | grep --color=no "will expire"`;
+    local cert_will_expire=$(openssl x509 -in "$cert_file" -nocert -checkend $(( 14 * $secinday )) | grep --color=no "will expire");
     if ! [[ -z "$cert_will_expire" ]]; then
       cert_will_expire="true";
     else
@@ -118,7 +118,7 @@ function read_x509() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$cert_data'";
   else
-printf "%s\n" ""$cert_data";"
+      printf "%s\n" "$cert_data";
   fi
 }
 
@@ -148,12 +148,12 @@ function build_cert_line() {
         after_domain_space="$after_domain_space ";
       done
 
-      local cert_end_stripped=`printf "%s\n" ""$cert_end" | cut -c5,8 --complement`;"
-      local cert_end_as_sec=`date +%s -d "$cert_end_stripped"`;
+      local cert_end_stripped=$(printf "%s\n" "$cert_end" | cut -c5,8 --complement);
+      local cert_end_as_sec=$(date +%s -d "$cert_end_stripped");
 
-      local today=`date +%Y-%m-%d`;
-      local today_stripped=`printf "%s\n" ""$today" | cut -c5,8 --complement`;"
-      local today_as_sec=`date +%s -d "$today_stripped"`;
+      local today=$(date +%Y-%m-%d);
+      local today_stripped=$(printf "%s\n" "$today" | cut -c5,8 --complement);
+      local today_as_sec=$(date +%s -d "$today_stripped");
 
       local difference_as_days=$(( ($cert_end_as_sec - $today_as_sec) / $secinday ));
 
@@ -240,7 +240,7 @@ function build_cert_line() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$build'";
   else
-printf "%s\n" ""$build";"
+printf "%s\n" "$build";
   fi
 }
 
@@ -321,7 +321,7 @@ function color() {
   if [[ "$__resultvar" ]]; then
       eval $__resultvar="'$answer'";
   else
-printf "%s\n" ""$answer";"
+printf "%s\n" "$answer";
   fi
   return 0;
 }
@@ -409,7 +409,7 @@ fi
 # Main Script Body - slim version, only check/display status of cert
 # -----------------------------------------------------------------------------
 if ! [[ -d "$certpath" ]]; then
-printf "%s\n" ""Certificate directory not found: $certpath";"
+printf "%s\n" "Certificate directory not found: $certpath";
 else
   cert_list=$(ls -1R "$certpath/"*"/cert.pem" | sort -f)
   filename_array=();
@@ -421,12 +421,12 @@ else
     for one_cert in $cert_list; do
       filename_array+=("$one_cert");
       cert_info=$(read_x509 "$one_cert");
-      cert_name=`printf "%s\n" ""$cert_info" | cut -d, -f1`;"
+      cert_name=$(printf "%s\n" "$cert_info" | cut -d, -f1);
       cert_name_array+=("$cert_name");
       if (( domain_maxlength < ${#cert_name} )); then
         domain_maxlength="${#cert_name}";
       fi
-      cert_end=`printf "%s\n" ""$cert_info" | cut -d, -f2`;"
+      cert_end=$(printf "%s\n" "$cert_info" | cut -d, -f2);
       cert_end_array+=("$cert_end");
       case "${sort_using}" in
         "name") sort_on_array+=("$cert_name"); ;;
@@ -473,29 +473,29 @@ else
   #  *) false; ;;
   # esac
 
-  if [[ "$debug" == "true" ]]; then printf "%s\n" """; fi;"
-  if [[ "$debug" == "true" ]]; then printf "%s\n" ""Database (${#filename_array[@]})  Sort Request: ${sort_using} ${sort_direction}"; fi;"
+  if [[ "$debug" == "true" ]]; then printf "%s\n" ""; fi;
+  if [[ "$debug" == "true" ]]; then printf "%s\n" "Database (${#filename_array[@]})  Sort Request: ${sort_using} ${sort_direction}"; fi;
   for (( i=0; $i<${#filename_array[@]}; i++ )) do
     count=$(( $i + 1 ));
     if (( ${#count} == 1 )); then
-      if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  $count:"; fi;"
+      if [[ "$debug" == "true" ]]; then printf "%s\n" "  $count:"; fi;
     elif (( ${#count} == 2 )); then
-      if [[ "$debug" == "true" ]]; then printf "%s\n" "-n " $count:"; fi;"
+      if [[ "$debug" == "true" ]]; then printf "%s\n" " $count:"; fi;
     fi
-    if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  ${cert_end_array[$i]}"; fi;"
-    if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  ${cert_name_array[$i]}"; fi;"
+    if [[ "$debug" == "true" ]]; then printf "%s\n" "  ${cert_end_array[$i]}"; fi;
+    if [[ "$debug" == "true" ]]; then printf "%s\n" "  ${cert_name_array[$i]}"; fi;
     for (( j=${#cert_name_array[$i]}; $j<$domain_maxlength; j++ )) do
-      if [[ "$debug" == "true" ]]; then printf "%s\n" "-n " "; fi;"
+      if [[ "$debug" == "true" ]]; then printf "%s\n" " "; fi;
     done
-    if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "  ${sort_on_array[$i]}"; fi;"
-    if [[ "$debug" == "true" ]]; then printf "%s\n" """; fi;"
+    if [[ "$debug" == "true" ]]; then printf "%s\n" "  ${sort_on_array[$i]}"; fi;
+    if [[ "$debug" == "true" ]]; then printf "%s\n" ""; fi;
   done
-  if [[ "$debug" == "true" ]]; then printf "%s\n" """; fi;"
+  if [[ "$debug" == "true" ]]; then printf "%s\n" ""; fi;
 
   if (( ${#filename_array[@]} == 0 )); then
-printf "%s\n" """;"
-printf "%b\n" ""${c_bold_white}Checking LetsEncrypt SSL Certificates${c_reset}";"
-printf "%b\n" ""  ${c_red}No Certificate Files Found.${c_reset}";"
+printf "%s\n" "";
+printf "%b\n" "${c_bold_white}Checking LetsEncrypt SSL Certificates${c_reset}";
+printf "%b\n" "  ${c_red}No Certificate Files Found.${c_reset}";
   else
     # bubble sorting
     array_length=${#filename_array[@]};
@@ -511,16 +511,16 @@ printf "%b\n" ""  ${c_red}No Certificate Files Found.${c_reset}";"
           if [[ "$sort_direction" == "desc" ]]; then
             if [[ "${itema}" < "${itemb}" ]]; then
               do_swap="true";
-              if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;"
+              if [[ "$debug" == "true" ]]; then printf "%s\n" "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;
             fi
           else
             if [[ "${itema}" > "${itemb}" ]]; then
               do_swap="true";
-              if [[ "$debug" == "true" ]]; then printf "%s\n" "-n "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;"
+              if [[ "$debug" == "true" ]]; then printf "%s\n" "pass: $passno index: $indexa swap requested on: ${itema} & ${itemb}"; fi;
             fi
           fi
           if [[ "${do_swap}" == "true" ]]; then
-            if [[ "$debug" == "true" ]]; then printf "%s\n" "" - performing swap"; fi;"
+            if [[ "$debug" == "true" ]]; then printf "%s\n" " - performing swap"; fi;
             swapped=1;
             temp_filename="${filename_array[$indexa]}";
             filename_array[$indexa]="${filename_array[$indexb]}";
@@ -540,21 +540,21 @@ printf "%b\n" ""  ${c_red}No Certificate Files Found.${c_reset}";"
         fi
       done
     done
-
-printf "%s\n" """;"
-printf "%b" ""${c_bold_white}Checking LetsEncrypt SSL Certificate";"
+\
+printf "%s\n" "";
+printf "%b" "${c_bold_white}Checking LetsEncrypt SSL Certificate";
     if (( ${#filename_array[@]} > 1 )); then
-printf "%b" ""s${c_reset} ${c_white}(${c_gold}${#filename_array[@]}${c_white}) ${c_dkgray}(${sort_using} ${sort_direction})${c_reset}";"
+printf "%b" "s${c_reset} ${c_white}(${c_gold}${#filename_array[@]}${c_white}) ${c_dkgray}(${sort_using} ${sort_direction})${c_reset}";
     fi
-printf "%s\n" """;"
+printf "%s\n" "";
 
     for (( i=0; $i<${#filename_array[@]}; i++ )); do
       one_line=$(build_cert_line "${cert_end_array[$i]}" "${cert_name_array[$i]}" "$domain_maxlength");
-printf "%b\n" ""$one_line";"
+printf "%b\n" "$one_line";
 
       if ! [[ -z "$1" ]]; then
         if [[ "$1" == "--renew" ]]; then
-          check=`printf "%s\n" ""$one_line" | grep -o "$warning"`;"
+          check=$(printf "%s\n" "$one_line" | grep -o "$warning");
           if ! [[ -z "$check" ]]; then
             sudo certbot renew --cert-name ${cert_name_array[$i]} --quiet;
           fi
