@@ -540,7 +540,7 @@ printf "%b\n" "  ${c_red}No Certificate Files Found.${c_reset}";
         fi
       done
     done
-\
+
 printf "%s\n" "";
 printf "%b" "${c_bold_white}Checking LetsEncrypt SSL Certificate";
     if (( ${#filename_array[@]} > 1 )); then
